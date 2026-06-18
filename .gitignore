@@ -1,0 +1,32 @@
+```gitignore
+# Java / Maven
+backend/target/
+*.class
+*.jar
+*.war
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Application logs
+logs/
+*.log
+
+# Docker local overrides
+docker-compose.override.yml
+```
