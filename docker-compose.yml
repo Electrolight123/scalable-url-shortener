@@ -3,48 +3,38 @@ services:
     image: postgres:16
     container_name: urlshortener-postgres
     restart: unless-stopped
-
     environment:
       POSTGRES_DB: urlshortener
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-
     ports:
       - "5432:5432"
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d urlshortener"]
       interval: 5s
       timeout: 5s
       retries: 10
 
-
   redis:
     image: redis:7
     container_name: urlshortener-redis
     restart: unless-stopped
-
     ports:
       - "6379:6379"
-
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 10
 
-
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-
     container_name: urlshortener-backend
     restart: unless-stopped
-
     environment:
       SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/urlshortener"
       SPRING_DATASOURCE_USERNAME: "postgres"
@@ -54,22 +44,31 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
       SPRING_JPA_OPEN_IN_VIEW: "false"
       APP_BASE_URL: "http://localhost:8080"
-      APP_JWT_SECRET: "${APP_JWT_SECRET:-0123456789012345678901234567890101234567890123456789012345678901}"
+      APP_JWT_SECRET: "0123456789012345678901234567890101234567890123456789012345678901"
       APP_JWT_EXPIRATION_MS: "86400000"
       APP_RATE_LIMIT_URL_CREATION_PER_HOUR: "20"
       APP_RATE_LIMIT_REDIRECTS_PER_MINUTE: "100"
       TZ: "Asia/Kolkata"
-
     ports:
       - "8080:8080"
-
     depends_on:
       postgres:
         condition: service_healthy
-
       redis:
         condition: service_healthy
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: urlshortener-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE_URL: "http://localhost:8080"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
